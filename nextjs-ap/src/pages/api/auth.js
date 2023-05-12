@@ -1,20 +1,22 @@
 import axios from "axios";
 import Cookies from "universal-cookie";
 
-const API_URL = "http://localhost:1337";
+export const API_URL = "http://localhost:1337";
 
-export async function login(username, password) {
-  const { data } = await axios.post(`${API_URL}/auth/local`, {
-    identifier: username,
+export async function login(identifier, password) {
+  const { data } = await axios.post(`${API_URL}/api/auth/local`, {
+    identifier,
     password,
   });
 
   const cookies = new Cookies();
   cookies.set("jwt", data.jwt);
+
+  return data;
 }
 
 export async function register(username, email, password) {
-  const { data } = await axios.post(`${API_URL}/auth/local/register`, {
+  const { data } = await axios.post(`${API_URL}/api/auth/local/register`, {
     username,
     email,
     password,

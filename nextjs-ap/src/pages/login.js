@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { login } from "./api/auth";
+import { login, API_URL } from "./api/auth";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -9,8 +9,19 @@ export default function LoginPage() {
 
   async function handleLogin(event) {
     event.preventDefault();
-    await login(username, password);
-    router.push("/");
+    const identifier = username;
+    const userPassword = password;
+    try {
+      const response = await login(identifier, userPassword);
+      console.log(response);
+      if (response && response.data && response.data.jwt) {
+        localStorage.setItem("jwt", response.data.jwt);
+        console.log("Check login");
+        router.push("/profile");
+      }
+    } catch (error) {
+      console.log("An error occurred:", error);
+    }
   }
 
   return (
@@ -18,7 +29,8 @@ export default function LoginPage() {
       <div>
         <label>Username</label>
         <input
-          type="text"
+          type="username"
+          name="identifier"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
         />
@@ -27,6 +39,7 @@ export default function LoginPage() {
         <label>Password</label>
         <input
           type="password"
+          name="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />

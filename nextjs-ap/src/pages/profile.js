@@ -15,12 +15,17 @@ export default function ProfilePage() {
       }
 
       try {
-        const { data } = await axios.get("http://localhost:1337/users/me", {
+        const response = await axios.get("http://localhost:1337/api/users/me", {
           headers: {
             Authorization: `Bearer ${jwt}`,
           },
         });
-        setUser(data);
+
+        if (response && response.data) {
+          setUser(response.data);
+        } else {
+          throw new Error("Invalid response from server");
+        }
       } catch (error) {
         console.error(error);
         localStorage.removeItem("jwt");
