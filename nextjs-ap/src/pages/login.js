@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { login, API_URL } from "./api/auth";
+import { login } from "./api/auth";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loginAttempts, setLoginAttempts] = useState(10); // Количество попыток
+  const [showErrorMessage, setShowErrorMessage] = useState(false); // Показывать сообщение об ошибке
   const router = useRouter();
 
   async function handleLogin(event) {
@@ -14,13 +16,18 @@ export default function LoginPage() {
     try {
       const response = await login(identifier, userPassword);
       console.log(response);
-      if (response && response.data && response.data.jwt) {
-        localStorage.setItem("jwt", response.data.jwt);
+      if (response && response.jwt) {
+        localStorage.setItem("jwt", response.jwt);
         console.log("Check login");
         router.push("/profile");
+      } else {
+        setLoginAttempts((prevAttempts) => prevAttempts - 1);
+        setShowErrorMessage(true);
       }
     } catch (error) {
       console.log("An error occurred:", error);
+      setLoginAttempts((prevAttempts) => prevAttempts - 1);
+      setShowErrorMessage(true);
     }
   }
 
@@ -44,7 +51,8 @@ export default function LoginPage() {
           onChange={(event) => setPassword(event.target.value)}
         />
       </div>
-      <button type="submit">Log in</button>
+      {showErrorMessage && <p>Invalid username or password.</p>}
+      <button type="submit" disabled={loginAttempts === 0}>Log in</button>
     </form>
   );
 }
